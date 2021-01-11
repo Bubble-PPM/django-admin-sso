@@ -53,12 +53,18 @@ def end(request):
     except FlowExchangeError:
         return HttpResponseRedirect(reverse("admin:index"))
 
-    if credentials.id_token["email_verified"]:
-        email = credentials.id_token["email"]
-        user = authenticate(request, sso_email=email)
-        if user and user.is_active:
-            login(request, user)
-            return HttpResponseRedirect(reverse("admin:index"))
+    if not settings.DJANGO_ADMIN_SSO_ALLOW_MISSING_EMAIL_VERIFIED and \
+            not credentials.id_token.get("email_verified", False):
+        return HttpResponseRedirect(reverse("admin:index"))
+
+    email = credentials.id_token.get("email", None)
+    if email is None:
+        return HttpResponseRedirect(reverse("admin:index"))
+
+    user = authenticate(request, sso_email=email)
+    if user and user.is_active:
+        login(request, user)
+        return HttpResponseRedirect(reverse("admin:index"))
 
     # if anything fails redirect to admin:index
     return HttpResponseRedirect(reverse("admin:index"))

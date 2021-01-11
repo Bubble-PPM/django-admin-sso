@@ -47,6 +47,15 @@ new project, and create a new client ID under the menu point "APIs & AUTH",
 "Credentials". The redirect URI should be of the form
 ``http://example.com/admin/admin_sso/assignment/end/``
 
+If using an OAuth2 provider that is not Google, you may need to allow the
+``email_verified`` attribute of the authorization response to be absent (Okta, for
+example, does not include it in the response to the ``email`` scope and requires an
+additional call to this full detail). Normally the check is not required as it won't
+be possible to proceed this far with an unverified email. To allow ``email_verified``
+to be absent or ``False``, insert the following in your ``settings.py`` file::
+
+    DJANGO_ADMIN_SSO_ALLOW_MISSING_EMAIL_VERIFIED = True
+
 6. Run ``./manage.py migrate`` to create the needed database tables.
 
 7. Log into the admin and add an Assignment.
